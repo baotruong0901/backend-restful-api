@@ -4,7 +4,7 @@ const dbState = [
     { value: 0, label: "Disconnected" },
     { value: 1, label: "Connected" },
     { value: 2, label: "Connecting" },
-    { value: 3, label: "Cisconnecting" }
+    { value: 3, label: "Isconnecting" }
 ];
 const connection = async () => {
     const option = {

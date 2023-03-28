@@ -4,16 +4,19 @@ const configViewEngine = require('./config/viewEngine')
 const initWebRoutes = require('./routes/web')
 const connection = require('./config/dbConnect')
 const bodyParser = require('body-parser')
+const fileUpload = require('express-fileupload');
 const app = express()
 const port = process.env.PORT || 8088
-const hostname = process.env.HOST_NAME
 
-configViewEngine(app)
-initWebRoutes(app)
+// default options
+app.use(fileUpload());
 
 //config req.body
-app.use(bodyParser.json({ limit: '50mb' }))
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(bodyParser.json({ limit: '50mb' })) // Used to parse JSON bodies
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); //Parse URL-encoded bodies
+
+configViewEngine(app)
+initWebRoutes(app);
 
 
 //‘self running’ function.
