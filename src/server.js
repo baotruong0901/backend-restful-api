@@ -3,6 +3,7 @@ const express = require('express')
 const configViewEngine = require('./config/viewEngine')
 const initWebRoutes = require('./routes/web')
 const connection = require('./config/dbConnect')
+const connectionWithDriver = require('./config/connectDBWithMongodbDriver')
 const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload');
 const app = express()
@@ -22,7 +23,17 @@ initWebRoutes(app);
 //‘self running’ function.
 (async () => {
     try {
+        //using mongoose 
+        //--start--
+
         await connection();
+
+        //--end--
+
+        //using mongodb driver
+        //-- start--
+        await connectionWithDriver();
+        //--end--
         app.listen(port, () => {
             console.log(`Backend Nodejs is Running on the port: ${port}`)
         })

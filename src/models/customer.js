@@ -25,7 +25,7 @@ const customerSchema = new mongoose.Schema({
 }, { timestamps: true }//createdAt, updatedAt
 );
 
-customerSchema.plugin(mongoose_delete);
+//thêm deleted=true khi xoá
 customerSchema.plugin(mongoose_delete, { overrideMethods: 'all' });
 //là công cụ giúp thao tác với database, ví dụ như Query
 const Customer = mongoose.model("customer", customerSchema);

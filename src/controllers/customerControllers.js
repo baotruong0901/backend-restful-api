@@ -1,20 +1,39 @@
 const apiService = require("../services/apiService")
 const fileService = require("../services/fileService")
-
+const Joi = require('joi');
 
 module.exports = {
 
     postCreateCustomer: async (req, res) => {
         try {
-            let image = ""
-            if (req.files || Object.keys(req.files).length > 0) {
-                let imageFile = await fileService.uploadSingleFile(req.files.image);
-                image = imageFile.path
+            const schema = Joi.object({
+                name: Joi.string()
+                    .alphanum()
+                    .min(3)
+                    .max(30)
+                    .required(),
+                phone: Joi.string()
+                    .pattern(new RegExp('^[0-9]{10,11}$')),
+                email: Joi.string()
+                    .email(),
+                address: Joi.string(),
+                description: Joi.string()
+            })
+            let { error } = schema.validate(req.body);
+            if (error) {
+                return res.status(404).json({
+                    EC: -1,
+                    EM: error
+                })
+            } else {
+                let image = ""
+                if (req.files || Object.keys(req.files).length > 0) {
+                    let imageFile = await fileService.uploadSingleFile(req.files.image);
+                    image = imageFile.path
+                }
+                let result = await apiService.createCustomer(req.body)
+                return res.status(200).json(result)
             }
-            let { name, email, phone, address, description } = req.body
-            let data = { name, email, phone, address, description, image }
-            let result = await apiService.createCustomer(data)
-            return res.status(200).json(result)
         } catch (error) {
             console.log(error);
         }

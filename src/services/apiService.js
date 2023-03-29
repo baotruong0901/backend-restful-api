@@ -1,6 +1,8 @@
 const User = require("../models/user")
 const Customer = require("../models/customer")
+const Project = require("../models/project")
 const aqp = require('api-query-params')
+const Task = require("../models/task")
 
 const getUSers = () => {
     return new Promise(async (resolve, reject) => {
@@ -41,6 +43,7 @@ const updateUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             let { email, name, city, userId } = data
+
             let user = await User.updateOne({ _id: userId }, {
                 email, name, city
             })
@@ -205,6 +208,207 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             try {
                 let result = await Customer.delete({ _id: { $in: arrayId } })
+                resolve({
+                    EC: 0,
+                    EM: "Succeed!",
+                    data: result
+                })
+            } catch (error) {
+                reject({
+                    EC: -1,
+                    EM: error.message
+                })
+            }
+        })
+    },
+    createProjects: (data) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let result = null
+                if (data.type === "EMPTY-PROJECT") {
+                    result = await Project.create(data)
+                }
+                if (data.type === "ADD-USERS") {
+                    let findProject = await Project.findById(data.projectId).exec()
+                    let check = true
+                    for (let i = 0; i < data.usersArr.length; i++) {
+                        if (findProject.usersInfor.indexOf(data.usersArr[i]) === -1) {
+                            findProject.usersInfor.push(data.usersArr[i])
+                            check = false
+                        }
+                    }
+                    if (check) {
+                        resolve({
+                            EC: 0,
+                            EM: "UserArr isExist!"
+                        })
+                    }
+                    result = await findProject.save()
+                    console.log(findProject);
+                }
+                if (data.type === "REMOVE-USERS") {
+                    let findProject = await Project.findById(data.projectId).exec()
+                    for (let i = 0; i < data.usersArr.length; i++) {
+                        findProject.usersInfor.pull(data.usersArr[i])
+                    }
+                    result = await findProject.save()
+                }
+                if (data.type === "ADD-TASKS") {
+                    let findProject = await Project.findById(data.projectId).exec()
+                    for (let i = 0; i < data.taskArr.length; i++) {
+                        findProject.tasks.push(data.taskArr[i])
+                    }
+                    result = await findProject.save()
+
+                    // console.log(findProject);
+                }
+                resolve({
+                    EC: 0,
+                    EM: "Succeed!",
+                    data: result
+                })
+            } catch (error) {
+                reject({
+                    EC: -1,
+                    EM: error.message
+                })
+            }
+        })
+    },
+    getProjects: (data) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const { filter, limit, population } = aqp(data);
+                let page = data.page
+                let offset = (page - 1) * limit
+                delete filter.page
+                // console.log("filter: ", filter);
+                let result = await Project.find(filter)
+                    // chuyển userId thành userInfor
+                    .populate(population)
+                    // bỏ qua "offset" phần tử
+                    .skip(offset)
+                    //lấy "limit" phần tử
+                    .limit(limit).exec()
+                resolve({
+                    EC: 0,
+                    EM: "Succeed!",
+                    data: result
+                })
+            } catch (error) {
+                reject({
+                    EC: -1,
+                    EM: error.message
+                })
+            }
+        })
+    },
+    deleteProjects: (projectId) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let result = await Project.delete({ _id: projectId })
+                resolve({
+                    EC: 0,
+                    EM: "Succeed!",
+                    data: result
+                })
+            } catch (error) {
+                reject({
+                    EC: -1,
+                    EM: error.message
+                })
+            }
+        })
+    },
+    updateProjects: (data) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let { id, name, description, endDate } = data
+                let result = await Project.updateOne({ _id: id }, { name, description, endDate })
+                resolve({
+                    EC: 0,
+                    EM: "Succeed!",
+                    data: result
+                })
+            } catch (error) {
+                reject({
+                    EC: -1,
+                    EM: error.message
+                })
+            }
+        })
+    },
+    //task
+    createTask: (data) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let result = null
+                if (data.type === "EMPTY-TASK") {
+                    result = await Task.create(data)
+                }
+                resolve({
+                    EC: 0,
+                    EM: "Succeed!",
+                    data: result
+                })
+            } catch (error) {
+                reject({
+                    EC: -1,
+                    EM: error.message
+                })
+            }
+        })
+    },
+    getTasks: (data) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const { filter, limit } = aqp(data);
+                let page = data.page
+                let offset = (page - 1) * limit
+                delete filter.page
+                // console.log("filter: ", filter);
+                let result = await Task.find(filter)
+                    // chuyển userId thành userInfor
+                    // .populate(population)
+                    // bỏ qua "offset" phần tử
+                    .skip(offset)
+                    //lấy "limit" phần tử
+                    .limit(limit).exec()
+                resolve({
+                    EC: 0,
+                    EM: "Succeed!",
+                    data: result
+                })
+            } catch (error) {
+                reject({
+                    EC: -1,
+                    EM: error.message
+                })
+            }
+        })
+    },
+    deleteTasks: (id) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let result = await Task.delete({ _id: id })
+                resolve({
+                    EC: 0,
+                    EM: "Succeed!",
+                    data: result
+                })
+            } catch (error) {
+                reject({
+                    EC: -1,
+                    EM: error.message
+                })
+            }
+        })
+    },
+    updateTasks: (data) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                // let { id, name, description, endDate, startDate, status } = data
+                let result = await Task.updateOne({ _id: data.id }, { ...data })
                 resolve({
                     EC: 0,
                     EM: "Succeed!",

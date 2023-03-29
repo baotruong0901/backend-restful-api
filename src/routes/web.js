@@ -1,6 +1,8 @@
 const express = require('express')
 const apiControllers = require('../controllers/apiControllers')
 const customerControllers = require('../controllers/customerControllers')
+const projectControllers = require('../controllers/projectControllers')
+const taskControllers = require('../controllers/taskControllers')
 
 const router = express.Router();
 const initWebRoutes = (app) => {
@@ -19,6 +21,18 @@ const initWebRoutes = (app) => {
     router.put('/customers', customerControllers.putUpdateCustomer)
     router.delete('/customer', customerControllers.deleteCustomer)
     router.delete('/customers', customerControllers.deleteArrayCustomer)
+
+    router.post('/projects', projectControllers.postProjects)
+    router.get('/projects', projectControllers.getProjects)
+    router.delete('/projects', projectControllers.deleteProjects)
+    router.put('/projects', projectControllers.updateProjects)
+
+    router.post('/tasks', taskControllers.postCreateTask)
+    router.get('/tasks', taskControllers.getTasks)
+    router.delete('/tasks', taskControllers.deleteTasks)
+    router.put('/tasks', taskControllers.updateTasks)
+
+
 
 
     return app.use("/api/", router)
